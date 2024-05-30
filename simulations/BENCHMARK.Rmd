@@ -1,0 +1,346 @@
+---
+title: "Comparaison des algos DUST de VRUNGE et SQUERNE"
+subtitle: "Modèle gaussien 1D"
+author: "Simon Querné"
+date: "23/05/2024"
+output:
+  html_document:
+    keep_md: true
+    css: styles.css
+    toc: true
+    toc_float: true
+    highlight: tango
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r Importation des packages, echo=FALSE}
+library(dust)
+library(DUSTpartitioning)
+```
+
+```{r Création des bibliothèques de fonctions, echo=FALSE}
+F.VR = list(
+  OP = function(data) dust_R_1D(data, pruningOpt = 0),
+  PELT = function(data) dust_R_1D(data, pruningOpt = 1),
+  DUSTr = function(data) dust_R_1D(data, pruningOpt = 2),
+  DUSTp = function(data) dust_R_1D(data, pruningOpt = 3)
+)
+
+F.SQ = list(
+  OP = function(data, cost_scale=.5) DUST_partitioning(data, pruning=0, cost_scale=cost_scale),
+  PELT = function(data, cost_scale=.5) DUST_partitioning(data, pruning=1, cost_scale=cost_scale),
+  DUSTx = function(data, cost_scale=.5) DUST_partitioning(data, pruning=2, cost_scale=cost_scale),
+  DUSTr = function(data, cost_scale=.5) DUST_partitioning(data, pruning=2, cost_scale=cost_scale, test_function=random_simple_test),
+  DUSTpx = function(data, cost_scale=.5) DUST_partitioning(data, pruning=3, cost_scale=cost_scale),
+  DUSTpr = function(data, cost_scale=.5) DUST_partitioning(data, pruning=3, cost_scale=cost_scale, test_function=random_simple_test)
+)
+```
+
+
+# Comparaison des résultats
+
+## Comparaison des couts optimaux
+
+```{r Fonction de comparaison des couts optimaux, echo=FALSE}
+compare_costs = function(data, f.VR, f.SQ, scale=.5)
+{
+  n = length(data)
+  
+  output.VR = f.VR(data)
+  output.SQ = f.SQ(data, scale)
+  
+  Q.VR = output.VR$costQ
+  Q.SQ = output.SQ$cost_record[-1]
+  
+  Q.diff = abs(Q.VR - Q.SQ)
+  
+  par(mfrow=c(1, 2))
+  
+  plot(0, type='n', xlim=c(1, n), ylim=quantile(c(Q.VR, Q.SQ), 0:1), main='Courbe des coûts dans le temps', xlab='t', ylab='Q(t)')
+  lines(1:n, Q.VR, col=3,lty=2)
+  lines(1:n, Q.SQ, col=4)
+  legend('topright', c('VRUNGE', 'SQUERNE'), col=c(3, 4), lty=c(2, 1))
+  
+  plot(data, pch=20, cex=.5, main='Les données', xlab='t', ylab='y(t)')
+}
+```
+
+```{r}
+y = rnorm(1e3)
+Q.noise = compare_costs(y, F.VR$DUSTr, F.SQ$DUSTx)
+Q.changepoints = compare_costs(generate_random_changepoints(1e3, 20, 0, 1, 9)$data, F.VR$DUSTr, F.SQ$DUSTx)
+```
+
+
+## Comparaison des changepoints
+
+```{r Fonction Comparaison des changepoints par méthode} 
+fdata = function(f, data) f(data)
+
+compare_changepoints = function(data, OP.VR, OP.SQ, PELT.VR, PELT.SQ, DUST.VR, DUST.SQ) {
+  n = length(data)
+  
+  output = list(
+    OP = list(VR = lapply(OP.VR, fdata, data=data), SQ = lapply(OP.SQ, fdata, data=data)),
+    PELT = list(VR = lapply(PELT.VR, fdata, data=data), SQ = lapply(PELT.SQ, fdata, data=data)),
+    DUST = list(VR = lapply(DUST.VR, fdata, data=data), SQ = lapply(DUST.SQ, fdata, data=data))
+  )
+  changepoints = lapply(
+    output,
+    function(method)
+      lapply(
+        method,
+        function(auteur)
+          lapply(auteur, function(f) c(0, f$changepoints[f$changepoints > 0]))
+      )
+  )
+  
+  for (name in names(changepoints)) {
+    par(mfrow = c(2, 1))
+    
+    current_method = changepoints[[name]]
+    n_auteur = vapply(current_method, length, numeric(1))
+    
+    plot(data, pch = 20, cex = .5, main = 'Les données', xlab = 't', ylab = 'y')
+    
+    plot(0, type = 'n', axes = FALSE, frame.plot = TRUE, main = paste('Comparaison des changepoints pour la méthode', name), xlab = '', ylab = '', xlim = c(1, n), ylim = c(0, sum(n_auteur)))
+    
+    if(n_auteur['VR'] > 1) abline(h = seq(1, n_auteur['VR'] - 1))
+    abline(h = n_auteur['VR'], lwd = 2)
+    if(n_auteur['SQ'] > 1) abline(h = n_auteur['VR'] + seq(1, n_auteur['SQ'] - 1))
+    
+    col = c(VR = 3, SQ = 4)
+    y0 = 0
+    y1 = 1
+    for (auteur in names(current_method)) {
+      changepoint.auteur = current_method[[auteur]]
+      for (f in changepoint.auteur) {
+        changepoints.f = f
+        K = length(changepoints.f)
+        segments(x0 = changepoints.f, y0 = rep(y0, K), y1 = rep(y1, K), col = col[auteur])
+        
+        y0 = y0 + 1
+        y1 = y1 + 1
+      }
+      
+    }
+  }
+}
+```
+
+```{r Comparaison des changepoints par méthode}
+output = compare_changepoints(
+  generate_random_changepoints(1e3, 1e3/50, 0, 1, 9)$data,
+  F.VR['OP'], F.SQ['OP'],
+  F.VR['PELT'], F.SQ['PELT'],
+  F.VR[c('DUSTr', 'DUSTp')], F.SQ[c('DUSTr', 'DUSTpr', 'DUSTx', 'DUSTpx')]
+)
+```
+
+## Comparaison des cas difficiles (fonction constante, pénalité nulle)
+
+# Comparaison de performance
+
+## Comparaison de runtime
+
+```{r Fonction de benchmark, echo=FALSE}
+benchmark = function(n, F.VR, F.SQ, data=NULL) {
+  if (length(data) > 0) data = data
+  else data = rnorm(n)
+  
+  print(list(
+    VR = vapply(
+      F.VR,
+      function(f) system.time(f(data))[1:3],
+      numeric(3)
+    ),
+    SQ = vapply(
+      F.SQ,
+      function(f) system.time(f(data))[1:3],
+      numeric(3)
+    )
+  ))
+}
+```
+
+```{r Benchmark pour 1,000 points de bruit blanc}
+n = 1e3
+benchmark(n, F.VR, F.SQ)
+```
+
+```{r Benchmark pour 10,000 points de bruit blanc}
+n = 1e4
+benchmark(n, F.VR[3:4], F.SQ[3:6])
+```
+
+```{r Benchmark pour 10,000 points de bruit blanc avec ruptures}
+benchmark(0, F.VR[3:4], F.SQ[3:6], data=generate_random_changepoints(n, n/50, 20, 1, 1)$data)
+```
+
+
+# Comparaison des indices non-élagués
+
+```{r Fonction de comparaison des indices conservés, echo=FALSE}
+compare_index = function(data, function_list.SQ, function_list.VR, display_fun = function(x) x) {
+  output.VR = lapply(
+    function_list.VR,
+    function(f) f(data)
+  )
+  output.SQ = lapply(
+    function_list.SQ,
+    function(f) f(data)
+  )
+  
+  n.index.VR = vapply(
+    output.VR,
+    function(f.output) f.output$nb,
+    numeric(n)
+  )
+  n.index.SQ = vapply(
+    output.SQ,
+    function(f.output) head(f.output$nb_record, -1),
+    numeric(n)
+  )
+  
+  par(mfrow=c(1, 2))
+  
+  plot(0, type='n', xlim=c(1, n), ylim=c(1, display_fun(max(n.index.VR))), main='Indices conservés VRUNGE', xlab='t', ylab='card(valid_index)')
+  for (i in seq(1, ncol(n.index.VR))) lines(1:n, display_fun(n.index.VR[, i]), col=i)
+  legend('topleft', names(F.VR), col=seq_along(F.VR), lty=rep(1, length(F.VR)))
+  
+  plot(0, type='n', xlim=c(1, n), ylim=c(1, display_fun(max(n.index.SQ))), main='Indices conservés SQUERNE', xlab='t', ylab='card(valid_index)')
+  for (i in seq(1, ncol(n.index.SQ))) lines(1:n, display_fun(n.index.SQ[, i]), col=i)
+  legend('topleft', names(F.SQ), col=seq_along(F.SQ), lty=rep(1, length(F.SQ)))
+  
+  
+  
+  return(list(VR = n.index.VR, SQ = n.index.SQ))
+}
+```
+
+```{r Comparaison des indices conservés pour 1,000 points de bruit blanc}
+n = 1e3
+n.index = compare_index(rnorm(n), F.SQ, F.VR, display_fun = log)
+```
+
+```{r}
+mean_time_indices = function(n, k, f, auteur) {
+  time_taken = matrix(nrow = k, ncol = 3)
+  nb = numeric(k)
+  
+  if (auteur == 'VR') record = 'nb'
+  else record = 'nb_record'
+  
+
+  for (i in 1:k) {
+    time_taken[i, ] = system.time(tmp_output <- f(rnorm(n)))[1:3]
+    nb[i] = tail(tmp_output[[record]], 1)
+  }
+  output = c(time_taken = mean(time_taken[, 3]), indices = mean(nb))
+  print(output)
+  return(output)
+}
+
+compare_deg_temps = function(n_max, k, f.VR, f.SQ, K) {
+  n_values = floor(n_max ^ seq(.5, 1, length.out = 10))
+  
+  output.VR = vapply(n_values, mean_time_indices, k = k, f = f.VR, auteur = 'VR', numeric(2))
+  output.SQ = vapply(n_values, mean_time_indices, k = k, f = f.SQ, auteur = 'SQ', numeric(2))
+  
+  t.VR = log(output.VR[1, ])
+  n.VR = log(output.VR[2, ])
+  t.SQ = log(output.SQ[1, ])
+  n.SQ = log(output.SQ[2, ])
+  
+  x = log(n_values)
+  
+  mod1 = list(VR = lm(n.VR ~ x), SQ = lm(n.SQ ~ x))
+  mod2 = list(VR = lm(t.VR ~ x), SQ = lm(t.SQ ~ x))
+  mod1_coef = vapply(mod1, coef, numeric(2))
+  mod2_coef = vapply(mod2, coef, numeric(2))
+  print(mod1_coef)
+  print(mod2_coef)
+  
+  par(mfrow = c(1, 2))
+  
+  #### Indices conservés ####
+  plot(0, type = 'n', xlim = quantile(x, 0:1), ylim=c(min(min(n.VR, n.SQ), 0), max(n.VR, n.SQ)), main='Coefficient directeur du loglog des indices conservés')
+  lines(x, n.VR, col=4)
+  lines(x, n.SQ, col=3)
+  
+  abline(mod1_coef[1, 1], mod1_coef[2, 1], col='navyblue', lwd=2)
+  abline(mod1_coef[1, 2], mod1_coef[2, 2], col='forestgreen', lwd=2)
+  
+  legend('topleft', c('VRUNGE random', 'SQUERNE exact'), col=c('navyblue', 'forestgreen'), lty=c(1, 1), lwd=c(2, 2))
+  
+  #### Temps écoulé ####
+  plot(0, type = 'n', xlim = quantile(x, 0:1), ylim=c(min(min(t.VR, t.SQ), 0), max(t.VR, t.SQ)), main='Coefficient directeur du loglog du temps écoulé')
+  lines(x, t.VR, col=4)
+  lines(x, t.SQ, col=3)
+  
+  abline(mod2_coef[1, 1], mod2_coef[2, 1], col='navyblue', lwd=2)
+  abline(mod2_coef[1, 2], mod2_coef[2, 2], col='forestgreen', lwd=2)
+  
+  legend('topleft', c('VRUNGE random', 'SQUERNE exact'), col=c('navyblue', 'forestgreen'), lty=c(1, 1), lwd=c(2, 2))
+  
+  return(list(n.VR = n.VR, t.VR = t.VR, n.SQ = n.SQ, t.SQ = t.SQ))
+}
+```
+
+```{r}
+n = 4e4
+cmp = compare_deg_temps(n, 10, F.VR$DUSTr, F.SQ$DUSTx)
+#write.csv(data.frame(lapply(cmp, function(l) {names(l) = log(n ^ seq(.5, 1, length.out = 10)) ; return(l)})), 'sauvegarde_log.csv')
+```
+
+```{r}
+#read.csv('sauvegarde_log.csv')
+```
+
+
+# Comparaison du taux d'opérations réalisées par rapport à OP
+
+```{r Fonction de comparaison du travail, echo=FALSE}
+compare_work = function(data, f.VR, f.SQ, display_fun=function(x) x, K = 1) {
+  n = length(data)
+  indices = floor(1:K/K * n)
+  indices_names = paste0(1:K * 100/K, '%')
+  
+  output.VR = f.VR(data)
+  output.SQ = f.SQ(data)
+  
+  n.VR = log(output.VR$nb)
+  n.SQ = log(vapply(output.SQ$index_record, length, numeric(1)))[-1]
+  max_n = indices * (indices + 1) / 2
+  
+  rat.VR = sum(n.VR) / max_n
+  rat.SQ = sum(n.SQ) / max_n
+  
+  output = rbind(VR = rat.VR, SQ = rat.SQ)
+  colnames(output) = indices_names
+  list(abs = output, ratio = setNames(rat.SQ / rat.VR, indices_names))
+}
+```
+
+```{r Comparaison du travail pour 10,000 points de bruit blanc}
+cwk = compare_work(rnorm(1e4), F.VR$DUSTr, F.SQ$DUSTx, K = 1)
+plot(cwk$ratio, type='l')
+```
+
+```{r}
+cwk$abs
+```
+
+```{r}
+library(fpop)
+n = 4e4
+beta = 2 * log(n)
+y = rnorm(n)
+system.time(FPOP <- Fpop(y, beta))
+system.time(DUST <- DUST_partitioning(y, pruning = 3), gcFirst = TRUE)
+```
+

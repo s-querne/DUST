@@ -1,0 +1,13 @@
+Package: DUSTpartitioning
+Type: Package
+Title: Functions for performing exact partitioning on data using the OP algorithm with DUST pruning step
+Version: 0.1.0
+Author: person('Simon', 'QUERNE', email='simon.querne@ens.uvsq.fr')
+Maintainer: Simon QUERNE <simon.querne@ens.uvsq.fr>
+Description: The DUST partitioning algorithm is an exact algorithm that yields the exact solution to a penalized changepoint detection problem. It is based on the Optimal Partitioning (OP, Jackson et al. 2005) algorithm, with the addition of a random functional pruning step that greatly reduces the computational cost of the algorithm by eliminating irrelevant candidates for new changepoints upon each iteration. 
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 1.0.12), RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.3.1

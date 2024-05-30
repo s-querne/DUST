@@ -1,0 +1,6 @@
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
+useDynLib(DUSTpartitioning, .registration = TRUE)
+importFrom("stats", "rbinom", "rexp", "rgeom", "rnbinom", "rnorm",
+             "rpois", "runif")
+importFrom("utils", "head", "tail")
