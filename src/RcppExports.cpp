@@ -11,19 +11,199 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// rcpp_hello
-List rcpp_hello();
-RcppExport SEXP _DUSTpartitioning_rcpp_hello() {
+// simpleTest
+double simpleTest(int t, int i, int j, const NumericVector& valuesCumsum, const NumericVector& costRecord);
+RcppExport SEXP _DUSTpartitioning_simpleTest(SEXP tSEXP, SEXP iSEXP, SEXP jSEXP, SEXP valuesCumsumSEXP, SEXP costRecordSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello());
+    Rcpp::traits::input_parameter< int >::type t(tSEXP);
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type valuesCumsum(valuesCumsumSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type costRecord(costRecordSEXP);
+    rcpp_result_gen = Rcpp::wrap(simpleTest(t, i, j, valuesCumsum, costRecord));
+    return rcpp_result_gen;
+END_RCPP
+}
+// DUST
+List DUST(NumericVector data, double penalty);
+RcppExport SEXP _DUSTpartitioning_DUST(SEXP dataSEXP, SEXP penaltySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
+    rcpp_result_gen = Rcpp::wrap(DUST(data, penalty));
+    return rcpp_result_gen;
+END_RCPP
+}
+// simpleTestFlist
+double simpleTestFlist(int t, int i, int pointerIt, const NumericVector& valuesCumsum, const NumericVector& costRecord);
+RcppExport SEXP _DUSTpartitioning_simpleTestFlist(SEXP tSEXP, SEXP iSEXP, SEXP pointerItSEXP, SEXP valuesCumsumSEXP, SEXP costRecordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type t(tSEXP);
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type pointerIt(pointerItSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type valuesCumsum(valuesCumsumSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type costRecord(costRecordSEXP);
+    rcpp_result_gen = Rcpp::wrap(simpleTestFlist(t, i, pointerIt, valuesCumsum, costRecord));
+    return rcpp_result_gen;
+END_RCPP
+}
+// DUSTflist
+List DUSTflist(NumericVector data, double penalty);
+RcppExport SEXP _DUSTpartitioning_DUSTflist(SEXP dataSEXP, SEXP penaltySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
+    rcpp_result_gen = Rcpp::wrap(DUSTflist(data, penalty));
+    return rcpp_result_gen;
+END_RCPP
+}
+// simpleTestFlistP
+double simpleTestFlistP(int t, int i, int pointerIt, const NumericVector& valuesCumsum, const NumericVector& costRecord);
+RcppExport SEXP _DUSTpartitioning_simpleTestFlistP(SEXP tSEXP, SEXP iSEXP, SEXP pointerItSEXP, SEXP valuesCumsumSEXP, SEXP costRecordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type t(tSEXP);
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type pointerIt(pointerItSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type valuesCumsum(valuesCumsumSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type costRecord(costRecordSEXP);
+    rcpp_result_gen = Rcpp::wrap(simpleTestFlistP(t, i, pointerIt, valuesCumsum, costRecord));
+    return rcpp_result_gen;
+END_RCPP
+}
+// DUSTflistp
+List DUSTflistp(NumericVector data, double penalty);
+RcppExport SEXP _DUSTpartitioning_DUSTflistp(SEXP dataSEXP, SEXP penaltySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
+    rcpp_result_gen = Rcpp::wrap(DUSTflistp(data, penalty));
+    return rcpp_result_gen;
+END_RCPP
+}
+// simpleTestReverse
+double simpleTestReverse(int t, int i, int j, const NumericVector& valuesCumsum, const NumericVector& costRecord);
+RcppExport SEXP _DUSTpartitioning_simpleTestReverse(SEXP tSEXP, SEXP iSEXP, SEXP jSEXP, SEXP valuesCumsumSEXP, SEXP costRecordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type t(tSEXP);
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type valuesCumsum(valuesCumsumSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type costRecord(costRecordSEXP);
+    rcpp_result_gen = Rcpp::wrap(simpleTestReverse(t, i, j, valuesCumsum, costRecord));
+    return rcpp_result_gen;
+END_RCPP
+}
+// DUSTreverse
+List DUSTreverse(NumericVector data, double penalty);
+RcppExport SEXP _DUSTpartitioning_DUSTreverse(SEXP dataSEXP, SEXP penaltySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
+    rcpp_result_gen = Rcpp::wrap(DUSTreverse(data, penalty));
+    return rcpp_result_gen;
+END_RCPP
+}
+// simpleTestVector
+double simpleTestVector(int t, int i, int j, const NumericVector& valuesCumsum, const NumericVector& costRecord);
+RcppExport SEXP _DUSTpartitioning_simpleTestVector(SEXP tSEXP, SEXP iSEXP, SEXP jSEXP, SEXP valuesCumsumSEXP, SEXP costRecordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type t(tSEXP);
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type valuesCumsum(valuesCumsumSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type costRecord(costRecordSEXP);
+    rcpp_result_gen = Rcpp::wrap(simpleTestVector(t, i, j, valuesCumsum, costRecord));
+    return rcpp_result_gen;
+END_RCPP
+}
+// DUSTvector
+List DUSTvector(NumericVector data, double penalty);
+RcppExport SEXP _DUSTpartitioning_DUSTvector(SEXP dataSEXP, SEXP penaltySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
+    rcpp_result_gen = Rcpp::wrap(DUSTvector(data, penalty));
+    return rcpp_result_gen;
+END_RCPP
+}
+// logging
+void logging(std::string txt);
+RcppExport SEXP _DUSTpartitioning_logging(SEXP txtSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type txt(txtSEXP);
+    logging(txt);
+    return R_NilValue;
+END_RCPP
+}
+// resetLogging
+void resetLogging(String path);
+RcppExport SEXP _DUSTpartitioning_resetLogging(SEXP pathSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< String >::type path(pathSEXP);
+    resetLogging(path);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_hello_world
+List rcpp_hello_world();
+RcppExport SEXP _DUSTpartitioning_rcpp_hello_world() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
+    return rcpp_result_gen;
+END_RCPP
+}
+// PELTcpp
+List PELTcpp(NumericVector data, double penalty);
+RcppExport SEXP _DUSTpartitioning_PELTcpp(SEXP dataSEXP, SEXP penaltySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
+    rcpp_result_gen = Rcpp::wrap(PELTcpp(data, penalty));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_DUSTpartitioning_rcpp_hello", (DL_FUNC) &_DUSTpartitioning_rcpp_hello, 0},
+    {"_DUSTpartitioning_simpleTest", (DL_FUNC) &_DUSTpartitioning_simpleTest, 5},
+    {"_DUSTpartitioning_DUST", (DL_FUNC) &_DUSTpartitioning_DUST, 2},
+    {"_DUSTpartitioning_simpleTestFlist", (DL_FUNC) &_DUSTpartitioning_simpleTestFlist, 5},
+    {"_DUSTpartitioning_DUSTflist", (DL_FUNC) &_DUSTpartitioning_DUSTflist, 2},
+    {"_DUSTpartitioning_simpleTestFlistP", (DL_FUNC) &_DUSTpartitioning_simpleTestFlistP, 5},
+    {"_DUSTpartitioning_DUSTflistp", (DL_FUNC) &_DUSTpartitioning_DUSTflistp, 2},
+    {"_DUSTpartitioning_simpleTestReverse", (DL_FUNC) &_DUSTpartitioning_simpleTestReverse, 5},
+    {"_DUSTpartitioning_DUSTreverse", (DL_FUNC) &_DUSTpartitioning_DUSTreverse, 2},
+    {"_DUSTpartitioning_simpleTestVector", (DL_FUNC) &_DUSTpartitioning_simpleTestVector, 5},
+    {"_DUSTpartitioning_DUSTvector", (DL_FUNC) &_DUSTpartitioning_DUSTvector, 2},
+    {"_DUSTpartitioning_logging", (DL_FUNC) &_DUSTpartitioning_logging, 1},
+    {"_DUSTpartitioning_resetLogging", (DL_FUNC) &_DUSTpartitioning_resetLogging, 1},
+    {"_DUSTpartitioning_rcpp_hello_world", (DL_FUNC) &_DUSTpartitioning_rcpp_hello_world, 0},
+    {"_DUSTpartitioning_PELTcpp", (DL_FUNC) &_DUSTpartitioning_PELTcpp, 2},
     {NULL, NULL, 0}
 };
 

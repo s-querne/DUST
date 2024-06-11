@@ -17,7 +17,7 @@
 
 DUST_partitioning <- function(
     values,
-    penalty = 2 * log(length(values)), ### INTEGRER UN ESTIMATEUR DE SIGMA DANS LA PENALISATION (MAD, HALL)
+    penalty = 2 * log(length(values)),
     cost_function = gauss_cost,
     cost_scale = 1,
     pruning = 2,

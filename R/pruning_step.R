@@ -30,6 +30,11 @@ pruning_step <- function(
       new_index = NULL
 
 
+      ############  Initializing index  ############
+
+      test_instance = test_function(values_cumsum, cost_scale, pruning)
+
+
       ############  Loop over input indices  ############
 
       for (objective_index in seq_along(valid_index)) {

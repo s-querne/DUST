@@ -1,0 +1,134 @@
+---
+title: "DUST C++ (avec comparaison FPOP)"
+author: "Simon QUERNE"
+date: "2024-06-11"
+output:
+  html_document:
+    keep_md: true
+    css: styles.css
+    toc: true
+    toc_float: true
+    highlight: tango
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Comparaison entre les différentes version de DUST
+
+<ol>
+  <li><u><b>DUSTvector:</b></u> Les indices sont enregistrés dans un objet Vector unique qui est mis à jour par construction</li>
+  <li><u><b>DUSTflist:</b></u> les indices sont enregistrés dans un objet forward_list et leur adresse mémoire dans un objet deque</li>
+  <li><u><b>DUSTflistp:</b></u> idem + le premier indice est élagué par PELT</li>
+  <li><u><b>DUSTreverse:</b></u> les adresses sont enregistrées dans un objet Vector que l'on élague par reverse_iterator (version avec inversion de l'iterator avant suppression)</li>
+  <li><u><b>DUST:</b></u> idem sans inversion de l'iterator</li>
+</ol>
+
+
+```{r compiler les programmes, echo=FALSE}
+fchar = c("DUSTvector", "DUSTflist", "DUSTflistp", "DUSTreverse", "DUST")
+path = sapply(
+  fchar,
+  function(x)
+    Rcpp::sourceCpp(
+      paste(
+        "..",
+        "src",
+        paste(x, "cpp", sep='.'),
+        sep='/'
+      )
+    )
+)
+f = c(DUSTvector, DUSTflist, DUSTflistp, DUSTreverse, DUST)
+library(DUSTpartitioning)
+```
+
+
+## Comparaison 1: bruit blanc
+
+Exécuter les algorithmes sur 100 vecteurs de bruit blanc de longueur 1 000
+
+```{r DUST rnorm(1000), echo=FALSE}
+n = 1e3
+
+output = 
+  microbenchmark::microbenchmark(
+    DUST_partitioning(rnorm(n)),
+    DUSTvector(rnorm(n)),
+    DUSTflist(rnorm(n)),
+    DUSTflistp(rnorm(n)),
+    DUSTreverse(rnorm(n)),
+    DUST(rnorm(n)),
+    times = 1e2
+  )
+
+output
+```
+
+
+## Comparaison 2: n/50 changepoints
+
+Exécuter les algorithmes sur 100 vecteurs de longueur 1 000 avec 20 changepoints
+
+```{r DUST changepoints(1000), echo=FALSE}
+n = 1e3
+K = n/50
+
+output = 
+  microbenchmark::microbenchmark(
+    DUST_partitioning(generate_random_changepoints(n, K, 0, 1, 9)$data),
+    DUSTvector(generate_random_changepoints(n, K, 0, 1, 9)$data),
+    DUSTflist(generate_random_changepoints(n, K, 0, 1, 9)$data),
+    DUSTflistp(generate_random_changepoints(n, K, 0, 1, 9)$data),
+    DUSTreverse(generate_random_changepoints(n, K, 0, 1, 9)$data),
+    DUST(generate_random_changepoints(n, K, 0, 1, 9)$data),
+    times = 1e2
+  )
+
+output
+```
+
+
+# Comparaison entre le meilleur DUST et le meilleur FPOP
+
+## Comparaison 1: bruit blanc
+
+Exécuter les algorithmes sur 1 000 vecteurs de bruit blanc de longueur 1 000
+
+```{r DUST vs FPOP rnorm(1000), echo=FALSE}
+n = 1e3
+beta = 2 * log(n)
+
+output = 
+  microbenchmark::microbenchmark(
+    DUST(rnorm(n)),
+    fpopw::Fpop(rnorm(n), lambda = beta),
+    times = 1e3
+  )
+
+output
+
+# aggregate(output$time, list(output$expr), list(mean=mean, median=median))
+```
+
+
+## Comparaison 2: n/50 changepoints
+
+Exécuter les algorithmes sur 1 000 vecteurs de longueur 1 000 avec 20 changepoints
+
+```{r DUST vs FPOP changepoints(1000), echo=FALSE}
+n = 1e3
+K = n/50
+beta = 2 * log(n)
+
+output = 
+  microbenchmark::microbenchmark(
+    DUST(generate_random_changepoints(n, K, 0, 1, 9)$data, penalty = beta),
+    fpopw::Fpop(generate_random_changepoints(n, K, 0, 1, 9)$data, lambda = beta),
+    times = 1e3
+  )
+
+output
+```

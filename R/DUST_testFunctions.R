@@ -62,8 +62,10 @@ simple_test <- function(
       }
       else {
         mu_bound = objective_slice / gap_slice # t-i/i-j
-        sqrt_cost = cost_term + gap_slice * gap_mean^2
-        optimal_mu = mu_bound * (1 - sqrt(gap_slice) * abs(objective_mean - gap_mean) / sqrt(sqrt_cost))
+        sqrt_cost = cost_term / gap_slice + gap_mean^2
+        optimal_mu = mu_bound * (1 - abs(objective_mean - gap_mean) / sqrt(sqrt_cost))
+
+        # print(optimal_mu)
 
         optimal_numerator = objective_sum - optimal_mu * gap_sum
         optimal_denominator = objective_slice - optimal_mu * gap_slice
@@ -71,7 +73,6 @@ simple_test <- function(
       }
 
       test_value = - optimal_numerator^2 / (inv_scale * optimal_denominator) + optimal_constant
-
       return(test_value > test_treshold)
 
     }
