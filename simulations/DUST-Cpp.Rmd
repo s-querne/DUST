@@ -19,16 +19,17 @@ knitr::opts_chunk$set(echo = TRUE)
 # Comparaison entre les différentes version de DUST
 
 <ol>
+  <li><u><b>DUST_partitioning:</b></u> La fonction de référence sous R</li>
   <li><u><b>DUSTvector:</b></u> Les indices sont enregistrés dans un objet Vector unique qui est mis à jour par construction</li>
-  <li><u><b>DUSTflist:</b></u> les indices sont enregistrés dans un objet forward_list et leur adresse mémoire dans un objet deque</li>
-  <li><u><b>DUSTflistp:</b></u> idem + le premier indice est élagué par PELT</li>
-  <li><u><b>DUSTreverse:</b></u> les adresses sont enregistrées dans un objet Vector que l'on élague par reverse_iterator (version avec inversion de l'iterator avant suppression)</li>
-  <li><u><b>DUST:</b></u> idem sans inversion de l'iterator</li>
+  <li><u><b>DUSTflistp:</b></u> Les indices sont enregistrés dans une forward list associée à un deque de pointers. Le premier indice est élagué par PELT</li>
+  <li><u><b>DUST:</b></u> Les indices sont enregistrés dans une forward list associée à un vecteur de pointersr</li>
+  <li><u><b>DUSTclass:</b></u> La gestion des indices et de leur pointer est faite via une classe ForwardListHandler</li>
 </ol>
 
 
 ```{r compiler les programmes, echo=FALSE}
-fchar = c("DUSTvector", "DUSTflist", "DUSTflistp", "DUSTreverse", "DUST")
+library(DUSTpartitioning)
+fchar = c("DUSTvector", "DUSTflistp", "DUST", "DUSTclass")
 path = sapply(
   fchar,
   function(x)
@@ -41,8 +42,6 @@ path = sapply(
       )
     )
 )
-f = c(DUSTvector, DUSTflist, DUSTflistp, DUSTreverse, DUST)
-library(DUSTpartitioning)
 ```
 
 
@@ -57,10 +56,9 @@ output =
   microbenchmark::microbenchmark(
     DUST_partitioning(rnorm(n)),
     DUSTvector(rnorm(n)),
-    DUSTflist(rnorm(n)),
     DUSTflistp(rnorm(n)),
-    DUSTreverse(rnorm(n)),
     DUST(rnorm(n)),
+    DUSTclass(rnorm(n)),
     times = 1e2
   )
 
@@ -104,6 +102,7 @@ beta = 2 * log(n)
 output = 
   microbenchmark::microbenchmark(
     DUST(rnorm(n)),
+    DUSTclass(rnorm(n)),
     fpopw::Fpop(rnorm(n), lambda = beta),
     times = 1e3
   )
@@ -126,6 +125,7 @@ beta = 2 * log(n)
 output = 
   microbenchmark::microbenchmark(
     DUST(generate_random_changepoints(n, K, 0, 1, 9)$data, penalty = beta),
+    DUSTclass(generate_random_changepoints(n, K, 0, 1, 9)$data, penalty = beta),
     fpopw::Fpop(generate_random_changepoints(n, K, 0, 1, 9)$data, lambda = beta),
     times = 1e3
   )

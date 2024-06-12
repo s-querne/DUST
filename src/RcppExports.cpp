@@ -11,21 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// simpleTest
-double simpleTest(int t, int i, int j, const NumericVector& valuesCumsum, const NumericVector& costRecord);
-RcppExport SEXP _DUSTpartitioning_simpleTest(SEXP tSEXP, SEXP iSEXP, SEXP jSEXP, SEXP valuesCumsumSEXP, SEXP costRecordSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type t(tSEXP);
-    Rcpp::traits::input_parameter< int >::type i(iSEXP);
-    Rcpp::traits::input_parameter< int >::type j(jSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type valuesCumsum(valuesCumsumSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type costRecord(costRecordSEXP);
-    rcpp_result_gen = Rcpp::wrap(simpleTest(t, i, j, valuesCumsum, costRecord));
-    return rcpp_result_gen;
-END_RCPP
-}
 // DUST
 List DUST(NumericVector data, double penalty);
 RcppExport SEXP _DUSTpartitioning_DUST(SEXP dataSEXP, SEXP penaltySEXP) {
@@ -35,6 +20,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
     Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
     rcpp_result_gen = Rcpp::wrap(DUST(data, penalty));
+    return rcpp_result_gen;
+END_RCPP
+}
+// DUSTclass
+List DUSTclass(NumericVector data, double penalty);
+RcppExport SEXP _DUSTpartitioning_DUSTclass(SEXP dataSEXP, SEXP penaltySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
+    rcpp_result_gen = Rcpp::wrap(DUSTclass(data, penalty));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -146,6 +143,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// simpleTest
+double simpleTest(int t, int i, int j, const NumericVector& valuesCumsum, const NumericVector& costRecord);
+RcppExport SEXP _DUSTpartitioning_simpleTest(SEXP tSEXP, SEXP iSEXP, SEXP jSEXP, SEXP valuesCumsumSEXP, SEXP costRecordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type t(tSEXP);
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< int >::type j(jSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type valuesCumsum(valuesCumsumSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type costRecord(costRecordSEXP);
+    rcpp_result_gen = Rcpp::wrap(simpleTest(t, i, j, valuesCumsum, costRecord));
+    return rcpp_result_gen;
+END_RCPP
+}
+// explo
+List explo();
+RcppExport SEXP _DUSTpartitioning_explo() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(explo());
+    return rcpp_result_gen;
+END_RCPP
+}
 // logging
 void logging(std::string txt);
 RcppExport SEXP _DUSTpartitioning_logging(SEXP txtSEXP) {
@@ -189,9 +211,11 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_ForwardListHandlerModule();
+
 static const R_CallMethodDef CallEntries[] = {
-    {"_DUSTpartitioning_simpleTest", (DL_FUNC) &_DUSTpartitioning_simpleTest, 5},
     {"_DUSTpartitioning_DUST", (DL_FUNC) &_DUSTpartitioning_DUST, 2},
+    {"_DUSTpartitioning_DUSTclass", (DL_FUNC) &_DUSTpartitioning_DUSTclass, 2},
     {"_DUSTpartitioning_simpleTestFlist", (DL_FUNC) &_DUSTpartitioning_simpleTestFlist, 5},
     {"_DUSTpartitioning_DUSTflist", (DL_FUNC) &_DUSTpartitioning_DUSTflist, 2},
     {"_DUSTpartitioning_simpleTestFlistP", (DL_FUNC) &_DUSTpartitioning_simpleTestFlistP, 5},
@@ -200,10 +224,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"_DUSTpartitioning_DUSTreverse", (DL_FUNC) &_DUSTpartitioning_DUSTreverse, 2},
     {"_DUSTpartitioning_simpleTestVector", (DL_FUNC) &_DUSTpartitioning_simpleTestVector, 5},
     {"_DUSTpartitioning_DUSTvector", (DL_FUNC) &_DUSTpartitioning_DUSTvector, 2},
+    {"_DUSTpartitioning_simpleTest", (DL_FUNC) &_DUSTpartitioning_simpleTest, 5},
+    {"_DUSTpartitioning_explo", (DL_FUNC) &_DUSTpartitioning_explo, 0},
     {"_DUSTpartitioning_logging", (DL_FUNC) &_DUSTpartitioning_logging, 1},
     {"_DUSTpartitioning_resetLogging", (DL_FUNC) &_DUSTpartitioning_resetLogging, 1},
     {"_DUSTpartitioning_rcpp_hello_world", (DL_FUNC) &_DUSTpartitioning_rcpp_hello_world, 0},
     {"_DUSTpartitioning_PELTcpp", (DL_FUNC) &_DUSTpartitioning_PELTcpp, 2},
+    {"_rcpp_module_boot_ForwardListHandlerModule", (DL_FUNC) &_rcpp_module_boot_ForwardListHandlerModule, 0},
     {NULL, NULL, 0}
 };
 
