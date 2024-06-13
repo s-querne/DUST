@@ -24,7 +24,7 @@ using namespace Rcpp;
 
 
 // [[Rcpp::export]]
-List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
+List DUSTone(NumericVector data, double penalty = 0, double alpha = 1e-9) {
   const int n = data.size();
   
   if(penalty == 0)
@@ -46,12 +46,10 @@ List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
   
   // Initialize pruning step values and vectors
   
-  int i;
   double testValue; // the value to be checked vs. the test threshold = optimalCost
   
-  ForwardListHandler validIndices(n, alpha); // the available indices (decreasing)
-  validIndices.add(0);
-  validIndices.add(1);
+  std::forward_list<int> validIndices {1, 0};
+  std::forward_list<int>::iterator before, i, j;
   
   
   // First OP step (t = 1)
@@ -70,20 +68,19 @@ List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
       valuesCumsum[t - 1] + data[t - 1];
     
     // OP step
-    validIndices.reset();
+    i = validIndices.begin();
     optimalCost = std::numeric_limits<double>::infinity();
     do
     {
-      i = validIndices.read();
-      lastCost = modelCost(t, i, valuesCumsum, costRecord);
+      lastCost = modelCost(t, *i, valuesCumsum, costRecord);
       if (lastCost < optimalCost)
       {
         optimalCost = lastCost;
-        optimalChangepoint = i;
+        optimalChangepoint = *i;
       }
-      validIndices.next();
+      ++i;
     }
-    while(validIndices.check());
+    while(i != validIndices.end());
     // END (OP step)
     
     // OP update
@@ -97,34 +94,38 @@ List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
     // }
     
     // DUST step
-    validIndices.reset_prune();
+    before = validIndices.before_begin();
+    i = std::next(before);
+    j = std::next(i);
 
     // DUST loop
     do
     {
-      testValue = simpleTest(t, validIndices.read(), *validIndices.draw(), valuesCumsum, costRecord); // compute test value
+      testValue = simpleTest(t, *i, *j, valuesCumsum, costRecord); // compute test value
       if (testValue > optimalCost) // prune as needs pruning
       {
         // remove the pruned index and its pointer
         // removing the elements increments the cursors i and pointerIt, while before stands still
-        validIndices.prune();
+        i = validIndices.erase_after(before);
       }
       else
       {
         // increment all cursors
-        validIndices.next_prune();
+        before = i;
+        i = j;
       }
+      ++j;
     }
-    while (validIndices.check_prune()); // exit the loop if we may not draw a valid constraint index
+    while (j != validIndices.end()); // exit the loop if we may not draw a valid constraint index
     // END (DUST loop)
 
     // Prune the last index (analoguous with a null (mu* = 0) duality simple test)
     if (lastCost > optimalCost) {
-      validIndices.prune();
+      validIndices.erase_after(before);
     }
     
     // update the available indices
-    validIndices.add(t);
+    validIndices.push_front(t);
   }
   
   // Backtrack des changepoints
@@ -137,7 +138,7 @@ List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
   // Output
   List output;
   output["changepoints"] = changepoints;
-  output["lastIndexSet"] = validIndices.get_list();
+  output["lastIndexSet"] = validIndices;
   output["costQ"] = costRecord;
   
   return output;

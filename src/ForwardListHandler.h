@@ -9,7 +9,7 @@ using namespace Rcpp;
 
 class ForwardListHandler {
 public:
-  ForwardListHandler(double sampleSize = 1e3);
+  ForwardListHandler(int inputSize = 1e3, double alpha = 1e-10);
   ~ForwardListHandler();
   void add(int value);
   
@@ -17,7 +17,7 @@ public:
   void next_prune();
   void reset();
   void reset_prune();
-  void reset_uniform();
+  // void reset_uniform(int size);
   bool check();
   bool check_prune();
   
@@ -33,12 +33,13 @@ public:
   int lengthConstraints;
   
 private:
-  double sampleSize;
   std::forward_list<int> list;
   std::vector<int*> pointers;
+  
   std::forward_list<int>::iterator current;
   std::forward_list<int>::iterator before;
   std::vector<int*>::reverse_iterator pointersCurrent;
+  
   NumericVector randomU;
   NumericVector::iterator u;
 };

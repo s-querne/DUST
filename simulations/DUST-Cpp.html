@@ -1463,30 +1463,28 @@ border-radius: 0px;
 différentes version de DUST</h1>
 <ol>
 <li>
+<u><b>DUST_partitioning:</b></u> La fonction de référence sous R
+</li>
+<li>
 <u><b>DUSTvector:</b></u> Les indices sont enregistrés dans un objet
 Vector unique qui est mis à jour par construction
 </li>
 <li>
-<u><b>DUSTflist:</b></u> les indices sont enregistrés dans un objet
-forward_list et leur adresse mémoire dans un objet deque
+<u><b>DUSTflistp:</b></u> Les indices sont enregistrés dans une forward
+list associée à un deque de pointers. Le premier indice est élagué par
+PELT
 </li>
 <li>
-<u><b>DUSTflistp:</b></u> idem + le premier indice est élagué par PELT
+<u><b>DUST:</b></u> Les indices sont enregistrés dans une forward list
+associée à un vecteur de pointers
 </li>
 <li>
-<u><b>DUSTreverse:</b></u> les adresses sont enregistrées dans un objet
-Vector que l’on élague par reverse_iterator (version avec inversion de
-l’iterator avant suppression)
-</li>
-<li>
-<u><b>DUST:</b></u> idem sans inversion de l’iterator
+<u><b>DUSTclass:</b></u> La gestion des indices et de leur pointer est
+faite via une classe ForwardListHandler, et un vecteur runif de taille
+n^1.2 ou n^1.3 est généré au début du programme pour la sélection de
+l’indice de contrainte
 </li>
 </ol>
-<pre><code>## 
-## Attaching package: &#39;DUSTpartitioning&#39;</code></pre>
-<pre><code>## The following objects are masked _by_ &#39;.GlobalEnv&#39;:
-## 
-##     DUST, DUSTflist, simpleTest, simpleTestFlist</code></pre>
 <div id="comparaison-1-bruit-blanc" class="section level2" number="1.1">
 <h2><span class="header-section-number">1.1</span> Comparaison 1: bruit
 blanc</h2>
@@ -1497,19 +1495,17 @@ blanc</h2>
 ## integer overflows</code></pre>
 <pre><code>## Unit: microseconds
 ##                         expr       min         lq       mean     median
-##  DUST_partitioning(rnorm(n)) 61083.276 69456.5420 76052.1251 73845.4280
-##         DUSTvector(rnorm(n))  1444.840  1607.7535  1794.2404  1714.5585
-##          DUSTflist(rnorm(n))   702.166   750.6485   863.0385   786.1135
-##         DUSTflistp(rnorm(n))   741.116   823.8540   899.6544   872.8900
-##        DUSTreverse(rnorm(n))   364.736   390.2790   444.1255   405.2850
-##               DUST(rnorm(n))   348.254   372.1570   401.8357   388.7210
+##  DUST_partitioning(rnorm(n)) 60175.290 69920.8260 75440.4711 73611.5435
+##         DUSTvector(rnorm(n))  1369.892  1615.2155  1779.0572  1713.6565
+##         DUSTflistp(rnorm(n))   756.327   811.0825   877.2946   858.5810
+##               DUST(rnorm(n))   408.073   438.5770   462.9060   453.0705
+##          DUSTclass(rnorm(n))   319.513   348.6230   369.9889   365.4945
 ##          uq        max neval
-##  81144.9040 102437.557   100
-##   1856.9310   3176.188   100
-##    834.5960   4232.553   100
-##    913.9720   2171.278   100
-##    428.4910   1468.292   100
-##    413.7925   1042.712   100</code></pre>
+##  79643.5660 101227.934   100
+##   1836.4515   2913.460   100
+##    898.4330   1875.545   100
+##    474.2265    923.443   100
+##    384.2725    695.237   100</code></pre>
 </div>
 <div id="comparaison-2-n50-changepoints" class="section level2" number="1.2">
 <h2><span class="header-section-number">1.2</span> Comparaison 2: n/50
@@ -1518,19 +1514,17 @@ changepoints</h2>
 changepoints</p>
 <pre><code>## Unit: microseconds
 ##                                                                 expr       min
-##  DUST_partitioning(generate_random_changepoints(n, K, 0, 1, 9)$data) 52666.222
-##         DUSTvector(generate_random_changepoints(n, K, 0, 1, 9)$data)   984.123
-##          DUSTflist(generate_random_changepoints(n, K, 0, 1, 9)$data)   616.927
-##         DUSTflistp(generate_random_changepoints(n, K, 0, 1, 9)$data)   601.921
-##        DUSTreverse(generate_random_changepoints(n, K, 0, 1, 9)$data)   357.315
-##               DUST(generate_random_changepoints(n, K, 0, 1, 9)$data)   344.318
+##  DUST_partitioning(generate_random_changepoints(n, K, 0, 1, 9)$data) 51662.460
+##         DUSTvector(generate_random_changepoints(n, K, 0, 1, 9)$data)   979.449
+##         DUSTflistp(generate_random_changepoints(n, K, 0, 1, 9)$data)   581.052
+##               DUST(generate_random_changepoints(n, K, 0, 1, 9)$data)   382.735
+##          DUSTclass(generate_random_changepoints(n, K, 0, 1, 9)$data)   305.860
 ##          lq       mean     median         uq       max neval
-##  57783.9650 61778.3502 60891.9905 64029.7000 93356.016   100
-##   1127.2130  1296.7455  1208.6800  1290.5365  4452.600   100
-##    674.1220   730.4593   708.4185   741.1980  1781.737   100
-##    651.8385   722.3405   679.9030   726.9095  1758.531   100
-##    381.3820   416.0258   396.3470   452.3530   522.299   100
-##    370.9270   410.1205   383.5345   403.4195  1392.770   100</code></pre>
+##  58371.1670 61634.8408 60762.5125 64154.3195 89375.080   100
+##   1116.9835  1217.4015  1194.3915  1268.5195  2180.544   100
+##    648.2715   700.0791   676.5820   728.7135  1782.967   100
+##    409.3850   437.1170   423.1815   442.9640   554.607   100
+##    331.0545   362.4699   347.1265   379.7830   481.668   100</code></pre>
 </div>
 </div>
 <div id="comparaison-entre-le-meilleur-dust-et-le-meilleur-fpop" class="section level1" number="2">
@@ -1543,11 +1537,13 @@ blanc</h2>
 longueur 1 000</p>
 <pre><code>## Unit: microseconds
 ##                                  expr     min       lq     mean   median
-##                        DUST(rnorm(n)) 335.995 364.7155 384.6567 375.4165
-##  fpopw::Fpop(rnorm(n), lambda = beta) 248.747 265.3315 276.2229 271.0100
-##       uq      max neval
-##  388.680 2044.547  1000
-##  277.652 4229.601  1000</code></pre>
+##                        DUST(rnorm(n)) 384.908 431.1560 456.6846 444.9320
+##                   DUSTclass(rnorm(n)) 304.507 343.2725 359.4694 356.7205
+##  fpopw::Fpop(rnorm(n), lambda = beta) 247.148 266.5820 277.7342 272.2195
+##        uq      max neval
+##  462.3160 3102.388  1000
+##  370.3325  449.811  1000
+##  278.7385 2555.366  1000</code></pre>
 </div>
 <div id="comparaison-2-n50-changepoints-1" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> Comparaison 2: n/50
@@ -1557,10 +1553,12 @@ changepoints</p>
 <pre><code>## Unit: microseconds
 ##                                                                               expr
 ##             DUST(generate_random_changepoints(n, K, 0, 1, 9)$data, penalty = beta)
+##        DUSTclass(generate_random_changepoints(n, K, 0, 1, 9)$data, penalty = beta)
 ##  fpopw::Fpop(generate_random_changepoints(n, K, 0, 1, 9)$data,      lambda = beta)
-##      min      lq     mean  median       uq      max neval
-##  337.430 360.513 377.9904 368.836 378.6965 1953.937  1000
-##  266.541 287.820 297.7712 293.396 300.0790 1876.488  1000</code></pre>
+##      min       lq     mean   median       uq      max neval
+##  354.486 400.5290 423.4777 412.4190 424.1655 2423.920  1000
+##  284.950 320.2305 333.7324 330.9110 342.1040 2119.987  1000
+##  268.304 291.3460 301.9643 297.8445 303.4000 2077.470  1000</code></pre>
 </div>
 </div>
 

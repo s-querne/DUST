@@ -1,6 +1,5 @@
 #include <Rcpp.h>
 #include "costFunctions.h"
-#include "ForwardListHandler.h"
 #include "logging.h"
 #include <forward_list>
 #include <cmath>
@@ -12,9 +11,9 @@
 using namespace Rcpp;
 
 
-// --------- // DUST // --------- //
+// --------- // OP // --------- //
 //
-// Provided some data vector, uses the DUST algorithm to return its optimal par-
+// Provided some data vector, uses the OP algorithm to return its optimal par-
 // titioning
 // 
 // Parameters:
@@ -24,7 +23,7 @@ using namespace Rcpp;
 
 
 // [[Rcpp::export]]
-List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
+List OP(NumericVector data, double penalty = 0) {
   const int n = data.size();
   
   if(penalty == 0)
@@ -38,93 +37,48 @@ List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
   
   
   // Initialize OP step values
-  
   double lastCost; // temporarily stores the cost for the model with last changepoint at some i, then keeps the cost of the model with last changepoint at the first possible index in the t-th OP step ...
-  // ... storing it allows pruning of the first available index
   int optimalChangepoint; // stores the optimal last changepoint for the current OP step
   double optimalCost; // stores the cost for the model with optimal last changepoint for the current OP step
   
+  
   // Initialize pruning step values and vectors
   
-  int i;
-  double testValue; // the value to be checked vs. the test threshold = optimalCost
-  
-  ForwardListHandler validIndices(n, alpha); // the available indices (decreasing)
-  validIndices.add(0);
-  validIndices.add(1);
-  
-  
-  // First OP step (t = 1)
-  
-  valuesCumsum[1] = data[0];
-  costRecord[1] = - pow(data[0], 2);
-  changepointsForward[1] = 0;
+  std::forward_list<int> validIndices {0}; // the available indices (decreasing)
+  std::forward_list<int>::iterator i;
+  std::forward_list<int>::iterator before;
   
   
   // Main loop
   
-  for (int t = 2; t <= n; t++)
+  for (int t = 1; t <= n; t++)
   {
     // update valuesCumsum
     valuesCumsum[t] =
       valuesCumsum[t - 1] + data[t - 1];
     
     // OP step
-    validIndices.reset();
+    i = validIndices.begin();
     optimalCost = std::numeric_limits<double>::infinity();
     do
     {
-      i = validIndices.read();
-      lastCost = modelCost(t, i, valuesCumsum, costRecord);
+      lastCost = modelCost(t, *i, valuesCumsum, costRecord);
       if (lastCost < optimalCost)
       {
-        optimalCost = lastCost;
-        optimalChangepoint = i;
+        optimalCost = lastCost + penalty;
+        optimalChangepoint = *i;
       }
-      validIndices.next();
+      ++i;
     }
-    while(validIndices.check());
+    while(i != validIndices.end());
     // END (OP step)
     
     // OP update
-    optimalCost += penalty;
     costRecord[t] = optimalCost;
     changepointsForward[t] = optimalChangepoint;
     
-    // if (t % 5) {
-    //   validIndices.add(t);
-    //   continue;
-    // }
-    
-    // DUST step
-    validIndices.reset_prune();
-
-    // DUST loop
-    do
-    {
-      testValue = simpleTest(t, validIndices.read(), *validIndices.draw(), valuesCumsum, costRecord); // compute test value
-      if (testValue > optimalCost) // prune as needs pruning
-      {
-        // remove the pruned index and its pointer
-        // removing the elements increments the cursors i and pointerIt, while before stands still
-        validIndices.prune();
-      }
-      else
-      {
-        // increment all cursors
-        validIndices.next_prune();
-      }
-    }
-    while (validIndices.check_prune()); // exit the loop if we may not draw a valid constraint index
-    // END (DUST loop)
-
-    // Prune the last index (analoguous with a null (mu* = 0) duality simple test)
-    if (lastCost > optimalCost) {
-      validIndices.prune();
-    }
-    
     // update the available indices
-    validIndices.add(t);
+    validIndices.push_front(t);
   }
   
   // Backtrack des changepoints
@@ -137,7 +91,7 @@ List DUSTclass(NumericVector data, double penalty = 0, double alpha = 1e-9) {
   // Output
   List output;
   output["changepoints"] = changepoints;
-  output["lastIndexSet"] = validIndices.get_list();
+  output["lastIndexSet"] = validIndices;
   output["costQ"] = costRecord;
   
   return output;

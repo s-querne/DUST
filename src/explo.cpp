@@ -52,10 +52,12 @@ void generate_runif2 (int n) {
   }
 }
 
+// [[Rcpp::export]]
+void test() {
+  ForwardListHandler x(1e3);
+  x.add(2);
+}
+
 /*** R
-microbenchmark::microbenchmark(
-  generate_runif1(1e2),
-  generate_runif2(1e2),
-  times = 1e3
-)
+test()
 */

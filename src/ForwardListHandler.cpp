@@ -5,9 +5,11 @@
 
 using namespace Rcpp;
 
-ForwardListHandler::ForwardListHandler(double sampleSize) : sampleSize(sampleSize) {
-  sampleSize = pow(sampleSize, 1.25);
-  reset_uniform();
+ForwardListHandler::ForwardListHandler(int inputSize, double alpha) {
+  double k = std::max(2., ceil(pow(inputSize, .2)));
+  randomU = Rcpp::runif(log(alpha) / log(1 - 1/k));
+  u = randomU.begin();
+  // reset_uniform(floor(pow(inputSize, 1.3)));
 }
 
 ForwardListHandler::~ForwardListHandler() {}
@@ -40,10 +42,10 @@ void ForwardListHandler::reset_prune() {
   pointersCurrent = pointers.rbegin();
 }
 
-void ForwardListHandler::reset_uniform() {
-  randomU = Rcpp::runif(sampleSize);
-  u = randomU.begin();
-}
+// void ForwardListHandler::reset_uniform(int size) {
+//   randomU = Rcpp::runif(size);
+//   u = randomU.begin();
+// }
 
 void ForwardListHandler::prune() {
   current = list.erase_after(before);
@@ -66,7 +68,8 @@ int* ForwardListHandler::draw() {
   ++u;
   if (u == randomU.end())
   {
-    reset_uniform();
+    // reset_uniform(floor(pow(inputSize, 1.3)));
+    u = randomU.begin();
   }
   return output;
 }
@@ -95,7 +98,7 @@ RCPP_MODULE(ForwardListHandlerModule) {
   .method("next_prune", &ForwardListHandler::next_prune)
   .method("reset", &ForwardListHandler::reset)
   .method("reset_prune", &ForwardListHandler::reset_prune)
-  .method("reset_uniform", &ForwardListHandler::reset_uniform)
+  // .method("reset_uniform", &ForwardListHandler::reset_uniform)
   .method("check", &ForwardListHandler::check)
   .method("check_prune", &ForwardListHandler::check_prune)
   .method("prune", &ForwardListHandler::prune)

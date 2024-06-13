@@ -22,25 +22,20 @@ knitr::opts_chunk$set(echo = TRUE)
   <li><u><b>DUST_partitioning:</b></u> La fonction de référence sous R</li>
   <li><u><b>DUSTvector:</b></u> Les indices sont enregistrés dans un objet Vector unique qui est mis à jour par construction</li>
   <li><u><b>DUSTflistp:</b></u> Les indices sont enregistrés dans une forward list associée à un deque de pointers. Le premier indice est élagué par PELT</li>
-  <li><u><b>DUST:</b></u> Les indices sont enregistrés dans une forward list associée à un vecteur de pointersr</li>
-  <li><u><b>DUSTclass:</b></u> La gestion des indices et de leur pointer est faite via une classe ForwardListHandler</li>
+  <li><u><b>DUST:</b></u> Les indices sont enregistrés dans une forward list associée à un vecteur de pointers</li>
+  <li><u><b>DUSTclass:</b></u> La gestion des indices et de leur pointer est faite via une classe ForwardListHandler, et un vecteur runif de taille n^1.2 ou n^1.3 est généré au début du programme pour la sélection de l'indice de contrainte</li>
 </ol>
 
 
 ```{r compiler les programmes, echo=FALSE}
 library(DUSTpartitioning)
-fchar = c("DUSTvector", "DUSTflistp", "DUST", "DUSTclass")
+fpaths = c(
+  paste("..", "archive", paste(c("DUSTvector", "DUSTflistp", "DUST"), "cpp", sep='.'), sep='/'),
+  paste("..", "src", paste(c("DUSTclass", "DUSTone"), "cpp", sep='.'), sep='/')
+)
 path = sapply(
-  fchar,
-  function(x)
-    Rcpp::sourceCpp(
-      paste(
-        "..",
-        "src",
-        paste(x, "cpp", sep='.'),
-        sep='/'
-      )
-    )
+  fpaths,
+  Rcpp::sourceCpp
 )
 ```
 
@@ -59,7 +54,8 @@ output =
     DUSTflistp(rnorm(n)),
     DUST(rnorm(n)),
     DUSTclass(rnorm(n)),
-    times = 1e2
+    times = 1e2,
+    setup = y <- rnorm(n)
   )
 
 output
@@ -78,10 +74,9 @@ output =
   microbenchmark::microbenchmark(
     DUST_partitioning(generate_random_changepoints(n, K, 0, 1, 9)$data),
     DUSTvector(generate_random_changepoints(n, K, 0, 1, 9)$data),
-    DUSTflist(generate_random_changepoints(n, K, 0, 1, 9)$data),
     DUSTflistp(generate_random_changepoints(n, K, 0, 1, 9)$data),
-    DUSTreverse(generate_random_changepoints(n, K, 0, 1, 9)$data),
     DUST(generate_random_changepoints(n, K, 0, 1, 9)$data),
+    DUSTclass(generate_random_changepoints(n, K, 0, 1, 9)$data),
     times = 1e2
   )
 

@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include "costFunctions.h"
+#include "../src/costFunctions.h"
 #include <forward_list>
 #include <cmath>
 #include <random>
